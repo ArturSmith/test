@@ -20,12 +20,10 @@ class UserSource(
     private val perPage: Int
 ) : PagingSource<Int, User>() {
 
-    private fun ensureValidKey(key: Int) = max(STARTING_KEY, key)
 
     override fun getRefreshKey(state: PagingState<Int, User>): Int? {
-        val anchorPosition = state.anchorPosition ?: return null
-        val user = state.closestItemToPosition(anchorPosition) ?: return null
-        return ensureValidKey(key = user.id - (state.config.pageSize / 2))
+        return state.anchorPosition?.let { state.closestItemToPosition(it)?.id }
+
     }
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)

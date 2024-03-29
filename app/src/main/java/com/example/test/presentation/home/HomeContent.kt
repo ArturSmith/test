@@ -1,6 +1,9 @@
 package com.example.test.presentation.home
 
+import android.util.Log
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,7 +51,9 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 @Composable
 fun HomeContent(component: HomeComponent) {
     val state by component.model.collectAsState()
-    Scaffold {
+    Scaffold(
+        containerColor = Color.White
+    ) {
         Box(Modifier.fillMaxSize().padding(it), contentAlignment = Alignment.Center) {
             when (val currentState = state) {
                 is DefaultHomeComponent.HomeScreenState.Error -> {
@@ -56,7 +63,7 @@ fun HomeContent(component: HomeComponent) {
                 is DefaultHomeComponent.HomeScreenState.Initial -> {
                     Initial(
                         state = currentState,
-                        onClickUser = { component.onClickUser(it) }
+                        component
                     )
                 }
 
@@ -81,7 +88,7 @@ private fun Error(state: DefaultHomeComponent.HomeScreenState.Error) {
 @Composable
 private fun Initial(
     state: DefaultHomeComponent.HomeScreenState.Initial,
-    onClickUser: (username: String) -> Unit
+    component: HomeComponent
 ) {
     val users = state.users.collectAsLazyPagingItems()
     var isRefreshing by remember { mutableStateOf(false) }
@@ -102,15 +109,19 @@ private fun Initial(
         }
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
             item {
                 Spacer(Modifier.height(10.dp))
             }
             items(users) {
                 it?.let {
-                    UserCard(it) { onClickUser(it) }
+                    UserCard(it) {
+                        component.onClickUser(it)
+                    }
                 }
             }
 
@@ -138,7 +149,10 @@ private fun UserCard(user: User, onClickUser: (username: String) -> Unit) {
                 modifier = Modifier.fillMaxSize(),
                 model = user.avatar_url,
                 contentDescription = null,
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                loading = {
+                    Box(Modifier.fillMaxSize().shimmerEffect())
+                }
             )
         }
         Spacer(Modifier.width(10.dp))

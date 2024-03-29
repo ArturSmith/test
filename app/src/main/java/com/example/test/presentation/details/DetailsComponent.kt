@@ -7,4 +7,5 @@ interface DetailsComponent {
 
     fun onBackPressed()
     fun onClickUser(username:String)
+
 }

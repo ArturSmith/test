@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,8 +36,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -52,7 +55,9 @@ import com.example.test.extensions.shimmerEffect
 fun DetailsContent(component: DetailsComponent) {
 
     val state by component.model.collectAsState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.White,
         topBar = {
             CenterAlignedTopAppBar(
@@ -62,7 +67,8 @@ fun DetailsContent(component: DetailsComponent) {
                     }
                 },
                 title = {},
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White),
+                scrollBehavior = scrollBehavior
             )
         }
     ) {
@@ -74,7 +80,7 @@ fun DetailsContent(component: DetailsComponent) {
                 }
 
                 is DefaultDetailsComponent.DetailsState.Initial -> {
-                    Initial(currentState){component.onClickUser(it)}
+                    Initial(currentState) { component.onClickUser(it) }
                 }
 
                 DefaultDetailsComponent.DetailsState.Loading -> {
@@ -118,9 +124,16 @@ private fun Initial(
                 }
             }
         }
+        item(span = { GridItemSpan(2) }) {
+            Text(
+                stringResource(R.string.also),
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                textAlign = TextAlign.Center
+            )
+        }
         items(users) {
             it?.let {
-                UserItem(it) {onCLick(it)}
+                UserItem(it) { onCLick(it) }
             }
         }
     }

@@ -6,4 +6,5 @@ interface HomeComponent {
     val model: StateFlow<DefaultHomeComponent.HomeScreenState>
 
     fun onClickUser(username:String)
+
 }
